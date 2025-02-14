@@ -22,18 +22,18 @@
             position: absolute;
             top: 10px;
             left: 10px;
-            max-width: 150px; /* Increased by 1.5 times */
-            max-height: 150px; /* Increased by 1.5 times */
-            transform: scale(1.5); /* Scale up by 1.5 */
-            transform-origin: top left; /* Ensure scaling from the top-left corner */
+            max-width: 150px;
+            max-height: 150px;
+            transform: scale(1.5);
+            transform-origin: top left;
         }
         #clientInfo {
             position: absolute;
-            top: 80px; /* Adjusted based on larger image size */
+            top: 80px;
             left: 10px;
             color: white;
             font-family: Arial, sans-serif;
-            font-size: 18px; /* Match with the file loading text */
+            font-size: 18px;
         }
         #fileInfo {
             position: absolute;
@@ -84,12 +84,21 @@
         let progress = 0;
         let intervalId;
 
-        // Simulated data for connecting client
-        let clientData = {
-            name: "PlayerName",
-            map: "gm_construct",
-            language: "English"
-        };
+        // Parse URL parameters
+        const urlParams = new URLSearchParams(window.location.search);
+        const steamId = urlParams.get('SteamId');
+        const mapName = urlParams.get('mapname');
+        const language = urlParams.get('language');
+
+        // Function to update client info with URL parameters
+        function updateClientInfo() {
+            document.getElementById('clientName').textContent = steamId || "Unknown";
+            document.getElementById('mapName').textContent = mapName || "Unknown Map";
+            document.getElementById('clientLanguage').textContent = language || "Unknown Language";
+        }
+
+        // Update client info if parameters are present
+        updateClientInfo();
 
         function createEmoji() {
             const emoji = document.createElement('div');
@@ -131,11 +140,6 @@
         }
 
         createEmojisGradually();
-
-        // Update client info without labels
-        document.getElementById('clientName').textContent = clientData.name;
-        document.getElementById('mapName').textContent = clientData.map;
-        document.getElementById('clientLanguage').textContent = clientData.language;
 
         function startNextDownload() {
             currentFileIndex = (currentFileIndex + 1) % files.length;
