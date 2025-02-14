@@ -3,25 +3,161 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Steam Grey with Image</title>
+    <title>Simulated GMod File Download with Client Info</title>
     <style>
-        body, html {
+        body {
             margin: 0;
             padding: 0;
-            width: 100%;
-            height: 100%;
-            background-color: #171a21; /* Steam's dark grey */
+            overflow: hidden;
+            background: #171a21; /* Steam's grey */
+            height: 100vh;
         }
-        img {
+        .emoji {
             position: absolute;
-            top: 10px;  /* Padding from top */
-            left: 10px; /* Padding from left */
-            max-width: 100px; /* Adjust as needed */
-            max-height: 100px; /* Adjust as needed */
+            font-size: 20px; /* Adjust for emoji size */
+            user-select: none;
+            text-shadow: 0 0 2px rgba(255, 255, 255, 0.5);
+        }
+        #cornerImage {
+            position: absolute;
+            top: 10px;
+            left: 10px;
+            max-width: 150px; /* Increased by 1.5 times */
+            max-height: 150px; /* Increased by 1.5 times */
+            transform: scale(1.5); /* Scale up by 1.5 */
+            transform-origin: top left; /* Ensure scaling from the top-left corner */
+        }
+        #clientInfo {
+            position: absolute;
+            top: 80px; /* Adjusted based on larger image size */
+            left: 10px;
+            color: white;
+            font-family: Arial, sans-serif;
+            font-size: 18px; /* Match with the file loading text */
+        }
+        #fileInfo {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            color: white;
+            text-align: center;
+            font-family: Arial, sans-serif;
+            font-size: 18px;
+        }
+        #progressBar {
+            width: 200px;
+            height: 10px;
+            background: #333;
+            border-radius: 5px;
+            margin: 10px auto;
+        }
+        #progressBarFill {
+            height: 100%;
+            background: #e0e0e0; /* Lighter white color for the progress bar */
+            width: 0%;
+            border-radius: 5px;
+            transition: width 0.3s;
         }
     </style>
 </head>
 <body>
-    <img src="https://i.imgur.com/4sgpcqj.png" alt="Image from Imgur">
+    <img id="cornerImage" src="https://i.imgur.com/4sgpcqj.png" alt="Image from Imgur">
+    <div id="clientInfo">
+        <p id="clientName">PlayerName</p>
+        <p id="mapName">gm_construct</p>
+        <p id="clientLanguage">English</p>
+    </div>
+    <div id="fileInfo">
+        <p id="currentFile">No file currently downloading</p>
+        <div id="progressBar">
+            <div id="progressBarFill"></div>
+        </div>
+    </div>
+
+    <script>
+        const emojis = ['😊', '😂', '😎', '🌟', '🚀', '🎮', '🐱', '🍎', '🌈', '🎉', '🏀', '🍕', '🎸', '🚲', '🌺'];
+        const count = 30;
+        const staggerTime = 100;
+        let files = ['map.bsp', 'texture.vtf', 'model.mdl', 'script.lua', 'sound.wav'];
+        let currentFileIndex = 0;
+        let progress = 0;
+        let intervalId;
+
+        // Simulated data for connecting client
+        let clientData = {
+            name: "PlayerName",
+            map: "gm_construct",
+            language: "English"
+        };
+
+        function createEmoji() {
+            const emoji = document.createElement('div');
+            emoji.textContent = emojis[Math.floor(Math.random() * emojis.length)];
+            emoji.className = 'emoji';
+            emoji.style.left = Math.random() * 100 + 'vw';
+            emoji.style.top = '-10px';
+            
+            const scale = Math.random() * 0.5 + 0.5;
+            emoji.style.transform = `scale(${scale})`;
+
+            const speed = Math.random() * 0.5 + 0.1;
+
+            let posY = 0;
+
+            function fall() {
+                posY += speed;
+                emoji.style.top = posY + 'px';
+
+                if (posY > window.innerHeight) {
+                    emoji.remove();
+                    createEmoji();
+                } else {
+                    requestAnimationFrame(fall);
+                }
+            }
+
+            document.body.appendChild(emoji);
+            requestAnimationFrame(fall);
+        }
+
+        let created = 0;
+        function createEmojisGradually() {
+            if (created < count) {
+                createEmoji();
+                created++;
+                setTimeout(createEmojisGradually, staggerTime);
+            }
+        }
+
+        createEmojisGradually();
+
+        // Update client info without labels
+        document.getElementById('clientName').textContent = clientData.name;
+        document.getElementById('mapName').textContent = clientData.map;
+        document.getElementById('clientLanguage').textContent = clientData.language;
+
+        function startNextDownload() {
+            currentFileIndex = (currentFileIndex + 1) % files.length;
+            progress = 0;
+            document.getElementById('currentFile').innerText = files[currentFileIndex];
+            if (intervalId) clearInterval(intervalId); // Clear previous interval if it exists
+            intervalId = setInterval(updateDownloadProgress, 1000 / 60); // Update 60 times per second for smooth progress
+        }
+
+        function updateDownloadProgress() {
+            progress += 0.005; // 0.5% per update, adjust for faster/slower progress
+            if (progress >= 1) {
+                clearInterval(intervalId);
+                document.getElementById('progressBarFill').style.width = '0%';
+                setTimeout(startNextDownload, 2000); // Wait 2 seconds before starting next download
+            } else {
+                document.getElementById('progressBarFill').style.width = `${progress * 100}%`;
+            }
+        }
+
+        // Start the simulation
+        startNextDownload();
+    </script>
 </body>
 </html>
