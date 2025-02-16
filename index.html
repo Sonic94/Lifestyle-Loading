@@ -28,6 +28,7 @@
             transform: scale(1.2);
             transform-origin: center;
             transition: filter 0.3s ease;
+            filter: hue-rotate(0deg); /* Initial filter state */
         }
         #title {
             position: absolute;
@@ -90,7 +91,6 @@
 </head>
 <body>
     <img id="cornerImage" src="https://i.imgur.com/4sgpcqj.png" alt="Lifestyle RP Logo">
-    <div id="title"></div>
     <div id="scroller">
         <span>⚠️ If you are crashing on join type 'mod_forcetouchdata 0' in console before joining ⚠️     ⚠️ Please start your Gmod client in x86-64 - Chromium + 64 binaries mode. ⚠️     </span>
     </div>
@@ -103,14 +103,14 @@
         const count = 30;
         const staggerTime = 100;
 
-        // Pastel colors array
-        const pastelColors = [
-            'hue-rotate(0deg) saturate(50%) brightness(90%)',    // Soft Red
-            'hue-rotate(60deg) saturate(50%) brightness(90%)',   // Soft Yellow
-            'hue-rotate(120deg) saturate(50%) brightness(90%)',  // Soft Green
-            'hue-rotate(180deg) saturate(50%) brightness(90%)',  // Soft Cyan
-            'hue-rotate(240deg) saturate(50%) brightness(90%)',  // Soft Blue
-            'hue-rotate(300deg) saturate(50%) brightness(90%)'   // Soft Purple
+        // Hue rotation values for pastel-like effects
+        const pastelHues = [
+            0,    // Red-ish
+            60,   // Yellow-ish
+            120,  // Green-ish
+            180,  // Cyan-ish
+            240,  // Blue-ish
+            300   // Purple-ish
         ];
 
         function createEmoji() {
@@ -170,8 +170,8 @@
         const cornerImage = document.getElementById('cornerImage');
         let posX = 0;
         let posY = 0;
-        let speedX = 0.05; // Slower speed in vw units per frame
-        let speedY = 0.05; // Slower speed in vh units per frame
+        let speedX = 0.08;
+        let speedY = 0.08;
         let colorIndex = 0;
 
         function bounceImage() {
@@ -181,27 +181,34 @@
 
             // Get image dimensions in viewport units
             const imgWidth = 15; // 15vw as set in CSS
-            const imgHeight = cornerImage.offsetHeight / window.innerHeight * 100; // Convert to vh
+            const imgHeight = cornerImage.offsetHeight / window.innerHeight * 100;
 
             // Check boundaries and bounce
+            let bounced = false;
             if (posX + imgWidth > 100) { // Right edge
                 posX = 100 - imgWidth;
                 speedX = -speedX;
-                changeColor();
+                bounced = true;
             } else if (posX < 0) { // Left edge
                 posX = 0;
                 speedX = -speedX;
-                changeColor();
+                bounced = true;
             }
 
             if (posY + imgHeight > 100) { // Bottom edge
                 posY = 100 - imgHeight;
                 speedY = -speedY;
-                changeColor();
+                bounced = true;
             } else if (posY < 0) { // Top edge
                 posY = 0;
                 speedY = -speedY;
-                changeColor();
+                bounced = true;
+            }
+
+            // Change color if bounced
+            if (bounced) {
+                colorIndex = (colorIndex + 1) % pastelHues.length;
+                cornerImage.style.filter = `hue-rotate(${pastelHues[colorIndex]}deg) saturate(70%) brightness(90%)`;
             }
 
             // Apply position
@@ -211,10 +218,8 @@
             requestAnimationFrame(bounceImage);
         }
 
-        function changeColor() {
-            colorIndex = (colorIndex + 1) % pastelColors.length;
-            cornerImage.style.filter = pastelColors[colorIndex];
-        }
+        // Start with initial color
+        cornerImage.style.filter = `hue-rotate(${pastelHues[colorIndex]}deg) saturate(70%) brightness(90%)`;
 
         // Start the bouncing effect
         bounceImage();
