@@ -17,6 +17,7 @@
             align-items: center;
             font-family: 'Helvetica', 'Arial', sans-serif;
             color: #FFFFFF;
+            position: relative; /* For absolute positioning of QR codes */
         }
 
         #title {
@@ -32,6 +33,9 @@
             color: transparent;
             animation: glow 3s ease-in-out infinite;
             text-shadow: 0 0 10px rgba(255, 255, 255, 0.5);
+            margin-bottom: 15px; /* Consistent spacing */
+            position: relative;
+            z-index: 10;
         }
 
         @keyframes glow {
@@ -40,65 +44,143 @@
             100% { background-position: 0% 50%; }
         }
 
-        #loadingBar {
-            width: 20vw;
-            height: 0.5vh;
-            background: rgba(255, 255, 255, 0.2);
-            border-radius: 5px;
-            overflow: hidden;
-            margin-top: 4vh;
+        .loader-container {
+            display: flex;
+            flex-direction: column;
+            align-items: center; /* Center horizontally */
         }
 
-        #loadingProgress {
-            width: 0%;
-            height: 100%;
-            background: #FFFFFF;
-            border-radius: 5px;
-            box-shadow: 0 0 10px rgba(255, 255, 255, 0.8);
-            transition: width 0.5s ease;
+        .loader {
+            position: relative;
+            overflow: hidden;
+            border-right: 3px solid;
+            width: 0px;
+            animation: typewriter 7s steps(20) infinite, blink 0.5s steps(20) infinite;
+        }
+
+        .loader-text {
+            font-size: 25px;
+            font-weight: 500;
+            font-family: 'Helvetica', 'Arial', sans-serif;
+            white-space: nowrap;
+        }
+
+        .loading-prefix {
+            color: rgba(255, 255, 255, 0.5); /* Light grey from original */
+            text-shadow: 0 0 5px rgba(255, 255, 255, 0.3);
+        }
+
+        .loading-word {
+            text-shadow: 0 0 5px rgba(255, 255, 255, 0.3);
+        }
+
+        .qr-container {
+            position: absolute;
+            top: calc(50% + 32.5px + ((100vh - (50% + 32.5px)) / 2)); /* Midway between typing and bottom */
+            display: flex;
+            justify-content: space-around; /* Evenly spread across width */
+            width: 80%; /* Use most of the screen width for spacing */
+            max-width: 600px; /* Limit width to prevent overcrowding */
+            z-index: 5; /* Below text but above background */
+        }
+
+        .qr-code {
+            width: 141px; /* Same size as before */
+            height: 141px;
+        }
+
+        /* Pastel colors for each word */
+        .pastel-properties { color: #FFD1DC; } /* Pastel Pink */
+        .pastel-bank-accounts { color: #B9E4C9; } /* Pastel Green */
+        .pastel-workshop-content { color: #FFCC99; } /* Pastel Orange */
+        .pastel-vehicles { color: #AED9E0; } /* Pastel Blue */
+        .pastel-police { color: #B0C4DE; } /* Pastel Steel Blue */
+        .pastel-medics { color: #E6E6FA; } /* Pastel Lavender */
+        .pastel-marijuana { color: #98FB98; } /* Pastel Mint */
+        .pastel-cocaine { color: #F0E68C; } /* Pastel Yellow */
+        .pastel-meth { color: #D8BFD8; } /* Pastel Purple */
+        .pastel-rackets { color: #FFB6C1; } /* Pastel Rose */
+        .pastel-street-lights { color: #F5F5DC; } /* Pastel Beige */
+        .pastel-weather-system { color: #ADD8E6; } /* Pastel Sky Blue */
+        .pastel-taxes { color: #DDA0DD; } /* Pastel Plum */
+        .pastel-market { color: #F0D8A8; } /* Pastel Peach */
+        .pastel-inventory { color: #C1CDCD; } /* Pastel Gray */
+        .pastel-keys { color: #E0FFFF; } /* Pastel Cyan */
+
+        @keyframes typewriter {
+            0% { width: 0px; }
+            42.86% { width: var(--text-width); } /* Type out in 3s (3/7) */
+            57.14% { width: var(--text-width); } /* Pause for 1s (1/7) */
+            100% { width: 0px; } /* Delete in 3s (3/7) */
+        }
+
+        @keyframes blink {
+            0% { border-right-color: rgba(255, 255, 255, 0.75); }
+            100% { border-right-color: transparent; }
         }
     </style>
 </head>
 <body>
     <div id="title">Lifestyle RP</div>
-    <div id="loadingBar">
-        <div id="loadingProgress"></div>
+    <div class="loader-container">
+        <div class="loader" id="loader">
+            <span class="loader-text" id="loaderText">
+                <span class="loading-prefix">Loading </span>
+                <span class="loading-word" id="loadingWord">Properties</span>
+            </span>
+        </div>
+    </div>
+    <div class="qr-container">
+        <img src="https://api.qrcode-monkey.com/tmp/78af254ed4e02f3827a42ebdb89ddef7.svg?1741717167723" alt="QR Code Left" class="qr-code">
+        <img src="https://api.qrcode-monkey.com/tmp/17a1f2183ab434085b88e167debb7365.svg?1741715975519" alt="QR Code Discord" class="qr-code">
+        <img src="https://api.qrcode-monkey.com/tmp/689351d6169b6ef64ac06130d7fee35d.svg?1741717587700" alt="QR Code Right" class="qr-code">
     </div>
 
     <script>
-        const loadingProgress = document.getElementById('loadingProgress');
-        let progress = 0;
-        const totalTime = 240000; // 4 minutes in milliseconds
-        const updateInterval = 1000; // Update every 1 second
-        const totalUpdates = totalTime / updateInterval; // 240 updates over 4 minutes
-        const baseIncrement = 100 / totalUpdates; // Base increment to reach 100% in 4 mins (~0.4167% per second)
+        const words = [
+            "Properties", "Bank Accounts", "Workshop Content", "Vehicles",
+            "Police", "Medics", "Marijuana", "Cocaine", "Meth", "Rackets",
+            "Street Lights", "Weather System", "Taxes", "Market", "Inventory", "Keys"
+        ];
+        const pastelClasses = [
+            "pastel-properties", "pastel-bank-accounts", "pastel-workshop-content", "pastel-vehicles",
+            "pastel-police", "pastel-medics", "pastel-marijuana", "pastel-cocaine", "pastel-meth",
+            "pastel-rackets", "pastel-street-lights", "pastel-weather-system", "pastel-taxes",
+            "pastel-market", "pastel-inventory", "pastel-keys"
+        ];
+        let currentIndex = 0;
+        const loader = document.getElementById("loader");
+        const loaderText = document.getElementById("loaderText");
+        const loadingWord = document.getElementById("loadingWord");
 
-        function updateLoadingBar() {
-            // Random spurt: Occasionally add a larger random boost
-            const spurtChance = Math.random();
-            let increment = baseIncrement; // Default small increment
-            if (spurtChance > 0.8) { // 20% chance of a spurt
-                increment += Math.random() * 5; // Random boost between 0 and 5%
-            }
-
-            progress += increment;
-            if (progress > 100) progress = 100; // Cap at 100%
-
-            loadingProgress.style.width = progress + '%';
-
-            if (progress < 100) {
-                setTimeout(updateLoadingBar, updateInterval);
-            }
+        function updateLoaderText() {
+            // Remove previous pastel class
+            pastelClasses.forEach(cls => loadingWord.classList.remove(cls));
+            // Update text and add new pastel class
+            loadingWord.textContent = words[currentIndex];
+            loadingWord.classList.add(pastelClasses[currentIndex]);
+            // Calculate and set the exact width for this text
+            const textWidth = loaderText.offsetWidth;
+            loader.style.setProperty('--text-width', `${textWidth}px`);
+            // Restart the animation
+            loader.style.animation = 'none';
+            setTimeout(() => {
+                loader.style.animation = 'typewriter 7s steps(20) infinite, blink 0.5s steps(20) infinite';
+            }, 10); // Small delay to ensure reset
+            // Move to next word
+            currentIndex = (currentIndex + 1) % words.length;
         }
 
-        // Start the loading process
-        updateLoadingBar();
+        // Initial call
+        updateLoaderText();
 
-        // Ensure completion at 4 minutes
+        // Update every 7 seconds to match full type-pause-delete cycle
+        setInterval(updateLoaderText, 7000);
+
+        // Optional: Simulate loading completion
         setTimeout(() => {
-            progress = 100;
-            loadingProgress.style.width = '100%';
-        }, totalTime);
+            console.log("Loading complete!");
+        }, 240000); // 4 minutes in milliseconds
     </script>
 </body>
 </html>
